@@ -14,7 +14,13 @@ cd $Destination\OpenSSH-Win64
 .\install-sshd.ps1
 Start-Service sshd
 [system.io.directory]::CreateDirectory($sshUser)
-New-Item $sshUser\authorized_keys -ItemType "file" -Value $jenkinsPK    
+if (Test-Path -Path $sshUser\authorized_keys ) {
+    Add-Content $sshUser\authorized_keys "`n$jenkinsPK"
+}
+else {
+    New-Item $sshUser\authorized_keys -ItemType "file" -Value $jenkinsPK 
+}
+   
 netsh advfirewall firewall add rule name=SSHPort dir=in action=allow protocol=TCP localport=22
 $sshConfig | Set-Content $sshConfigFile
 Restart-Service sshd
